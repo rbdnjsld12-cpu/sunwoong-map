@@ -6,7 +6,8 @@
     <title>선웅방재 8월 점검 건축물 지도</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        #map { width: 100%; height: 100vh; touch-action: pan-x pan-y; }
+        html, body { width: 100%; height: 100%; }
+        #map { width: 100%; height: 100%; touch-action: pan-x pan-y; }
         .info-window {
             padding: 12px;
             min-width: 200px;
@@ -76,14 +77,27 @@
             disableDoubleClickZoom: false
         });
 
+        // SVG 마커 생성 함수 (확대해도 안 깨짐)
+        function createSvgMarker(color) {
+            var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="35" viewBox="0 0 24 35">' +
+                '<path d="M12 0C5.4 0 0 5.4 0 12c0 7.5 12 23 12 23s12-15.5 12-23C24 5.4 18.6 0 12 0z" fill="' + color + '"/>' +
+                '<circle cx="12" cy="12" r="5" fill="white"/>' +
+                '</svg>';
+            return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+        }
+
+        var jejuMarkerSrc = createSvgMarker('#3498db');
+        var seogwipoMarkerSrc = createSvgMarker('#e74c3c');
+
         var markers = [];
         var currentInfoWindow = null;
 
         buildings.forEach(function(b) {
+            var markerSrc = b.region === '제주시' ? jejuMarkerSrc : seogwipoMarkerSrc;
             var markerImage = new kakao.maps.MarkerImage(
-                'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_' + 
-                (b.region === '제주시' ? 'blue' : 'red') + '.png',
-                new kakao.maps.Size(33, 36)
+                markerSrc,
+                new kakao.maps.Size(24, 35),
+                { offset: new kakao.maps.Point(12, 35) }
             );
 
             var marker = new kakao.maps.Marker({
